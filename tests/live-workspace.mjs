@@ -27,6 +27,7 @@ export async function runWorkspaceVerification() {
     removeAdapter = api.registerControlAdapter('workspace-qa', { selector: '[data-workspace-qa]', describe: () => ({ default: 2, scope: 'user', requiresReload: true, saveMode: 'submit', getSavedValue: () => saved }) });
     await sheet.render({ force: true, resetTabs: true });
     await api.refreshIndex();
+    check(!sheet.element.querySelector('.improved-coverage') && sheet.element.querySelector('.improved-status').hidden, 'Idle settings omit search instructions and the coverage block');
     check(!!sheet.element.querySelector('aside .improved-favorites') && !sheet.element.querySelector('.improved-filter option[value="favorites"]'), 'Favorites are in the sidebar and absent from the Show menu');
     const searchBounds = sheet.element.querySelector('.improved-search-controls search').getBoundingClientRect();
     const showBounds = sheet.element.querySelector('.improved-filter-row').getBoundingClientRect();
@@ -41,6 +42,7 @@ export async function runWorkspaceVerification() {
     check(child?.tabGroups.primary === 'second' && child.tabGroups.secondary === 'nested', 'Selecting a result opens its window and navigates parent and nested tabs');
     const input = child.element.querySelector('[name="prismatic"]');
     const row = input.closest('.form-group');
+    check(row.querySelector('label').parentElement === row.querySelector('.improved-row-actions').parentElement && !row.querySelector('.improved-row-tools .improved-row-actions'), 'Setting actions sit beside their own setting name');
     check(row.querySelector('.improved-badges').textContent.includes('Player') && row.querySelector('.improved-badges').textContent.includes('Reload'), 'Custom metadata displays scope and reload requirements');
     input.value = '9'; input.dispatchEvent(new Event('input', { bubbles: true }));
     await pause(180);

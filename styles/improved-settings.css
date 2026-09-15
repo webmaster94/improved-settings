@@ -8,7 +8,7 @@
 .improved-settings .improved-search-input { width: 100%; font-family: inherit; }
 .improved-settings aside input[type=search]::placeholder { font-family: inherit; font-weight: normal; top: auto; }
 .improved-settings .improved-status { font-size: var(--font-size-12, 12px); color: var(--color-text-secondary); line-height: 1.35; }
-.improved-settings .improved-coverage { font-size: var(--font-size-11, 11px); color: var(--color-text-subtle); line-height: 1.3; }
+.improved-settings .improved-status[hidden] { display: none; }
 .improved-settings .improved-search-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: end; }
 .improved-settings .improved-options { display: block; min-width: 0; }
 .improved-settings .improved-options > label { width: 100%; align-items: stretch; text-align: start; }
@@ -19,14 +19,18 @@
 .improved-row-tools .improved-badges { display: flex; flex: 1; flex-wrap: wrap; align-items: center; gap: 4px; color: var(--color-text-secondary); }
 .improved-chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 7px; border: 1px solid color-mix(in srgb, currentColor 25%, transparent); border-radius: 20px; background: color-mix(in srgb, currentColor 7%, transparent); font-size: var(--font-size-11, 11px); line-height: 1.4; white-space: nowrap; cursor: help; }
 .improved-chip i { font-size: 0.9em; margin: 0; }
-.improved-row-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 2px; margin-inline-start: auto; }
+.improved-setting-heading { display: flex; align-items: center; gap: 8px; min-width: min-content; }
+.improved-setting-heading > label, .improved-setting-heading > [data-label], .improved-setting-heading > .setting-name { flex: 0 1 auto !important; width: auto !important; min-width: min-content; margin: 0; font-weight: inherit; }
+.improved-row-actions { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 2px; margin: 0; }
+.improved-setting-row { border-block-end: 1px solid color-mix(in srgb, var(--color-text-secondary, #aaa) 16%, transparent); padding-block-end: 10px; }
+.improved-setting-row:last-child { border-block-end-color: transparent; }
 .improved-settings .improved-icon-button, .improved-settings-child .improved-icon-button { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 26px; width: 26px; height: 26px; min-height: 26px; padding: 3px; margin: 0; border: 0; border-radius: 4px; background: transparent; box-shadow: none; color: var(--color-text-secondary); }
 .improved-icon-button i { margin: 0; pointer-events: none; }
 .improved-icon-button[aria-pressed="true"] { color: var(--color-warm-1, #e3b45b); }
 .improved-settings .improved-icon-button[aria-pressed="true"], .improved-settings-child .improved-icon-button[aria-pressed="true"] { color: var(--color-warm-1, #e3b45b); }
 .improved-icon-button:hover:not(:disabled), .improved-icon-button:focus-visible { background: color-mix(in srgb, currentColor 12%, transparent); outline: 1px solid currentColor; }
 .improved-icon-button:disabled { opacity: 0.3; }
-.improved-results summary, .improved-coverage summary, .improved-favorites summary { cursor: pointer; }
+.improved-results summary, .improved-favorites summary { cursor: pointer; }
 .improved-settings .improved-favorites { flex: 0 0 auto; padding-block: 6px; border-bottom: 1px solid var(--color-border-light-2, #635548); font-size: var(--font-size-12, 12px); }
 .improved-settings .improved-favorites summary { font-weight: bold; }
 .improved-settings .improved-favorite-list { max-height: 160px; }
@@ -38,7 +42,6 @@
 .improved-result-list button { text-align: start; }
 .improved-favorite { display: flex; gap: 6px; }
 .improved-favorite > button:first-child { flex: 1; text-align: start; }
-.improved-coverage-body { max-height: 220px; overflow-y: auto; }
 .improved-edit-summary, .improved-recovery { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .improved-edit-summary[hidden] { display: none; }
 .improved-edit-summary { border-inline-start: 3px solid var(--color-warm-1, orange); padding: 6px; font-size: var(--font-size-12, 12px); }

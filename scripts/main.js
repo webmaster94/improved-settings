@@ -143,8 +143,6 @@ export function install() {
       this.status = createUI("div", "improved-status");
       this.status.setAttribute("role", "status");
       this.status.setAttribute("aria-live", "polite");
-      this.coverage = createUI('details', 'improved-coverage');
-      this.coverage.append(createUI('summary', '', 'Search coverage'), createUI('div', 'improved-coverage-body'));
       const options = createUI('div', 'improved-options');
       const filterLabel = createUI('label', 'improved-search-label', 'Show');
       const filterRow = createUI('div', 'improved-filter-row');
@@ -173,7 +171,7 @@ export function install() {
       this.moduleBox.wrapper.after(this.favoritePanel);
       const searchControls = createUI('div', 'improved-search-controls');
       searchControls.append(this.settingBox.wrapper, options);
-      toolbar.append(searchControls, this.editSummary, this.reloadSummary, this.status, this.recovery, this.coverage);
+      toolbar.append(searchControls, this.editSummary, this.reloadSummary, this.status, this.recovery);
       main.prepend(toolbar);
       this.abort = new AbortController();
       this.root.addEventListener("click", event => captureButton(event, this, this.app), { capture: true, signal: this.abort.signal });
@@ -248,7 +246,8 @@ export function install() {
         if (visibleCategories.length && !visibleCategories.includes(current)) this.app.changeTab(visibleCategories[0], "categories");
         this.status.textContent = this.query.trim() || this.moduleQuery.trim() || this.mode !== 'all'
           ? `${total} matching settings or windows in ${visibleCategories.length} categories${total ? "" : ". Clear a filter or try fewer words."}`
-          : "Search any part of a word. Multiple words can appear in any order.";
+          : "";
+        this.status.hidden = !this.status.textContent;
         for (const child of children.values()) if (child.owner === this) updateChild(child);
         this.updateTools(total, outsideModules);
       } finally {
@@ -276,13 +275,6 @@ export function install() {
     }
 
     updateTools(total, outsideModules) {
-      const coverage = index.coverage();
-      this.coverage.querySelector('summary').textContent = coverage.busy ? 'Discovering custom windows…' : `Search coverage · ${coverage.observed} observed · ${coverage.described} described · ${coverage.unknown} undiscovered`;
-      const body = this.coverage.querySelector('div');
-      body.replaceChildren(createUI('p', '', 'Observed means controls have been seen, including visited tabs. Described means only templates or supplied descriptions are available. Neither guarantees every dynamic control is known. Open a window or visit a lazy tab to discover more.'));
-      const list = createUI('ul', '');
-      for (const entry of index.menus.values()) list.append(createUI('li', '', `${game.i18n.localize(entry.menu?.label || entry.menu?.name || entry.key)} · ${entry.state === 'observed' ? 'Controls observed' : entry.texts.length ? 'Descriptions available' : 'Not yet discovered'}`));
-      body.append(list);
       const records = workspace.records();
       const dirty = records.filter(record => record.dirty);
       this.editSummary.replaceChildren();
@@ -560,7 +552,7 @@ export function install() {
   windowObserver.observe(document.body, { childList: true });
 
   installed = {
-    version: "0.2.2",
+    version: "0.2.3",
     registerControlAdapter(id, adapter) {
       const remove = registerControlAdapter(id, adapter);
       for (const app of workspace.windows.keys()) workspace.invalidate(app);

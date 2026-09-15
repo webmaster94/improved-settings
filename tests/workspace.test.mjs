@@ -172,3 +172,23 @@ test('setting action tools do not leave empty structural groups visible', () => 
   filter.apply('');
   assert.equal(app.element.querySelectorAll('.improved-hidden').length, 0);
 });
+
+test('actions stay beside the native label without changing checkbox activation, and detach restores the form', () => {
+  const { workspace, app } = setup('<fieldset><legend>Options</legend><div class="form-group"><label for="enabled">Enabled</label><input id="enabled" name="sample.enabled" type="checkbox"></div></fieldset>');
+  const label = app.element.querySelector('label');
+  const input = app.element.querySelector('input');
+  const row = input.closest('.form-group');
+  const actions = row.querySelector('.improved-row-actions');
+  assert.equal(label.parentElement, actions.parentElement);
+  assert(!label.contains(actions));
+  actions.querySelector('button').click();
+  assert.equal(input.checked, false);
+  label.click();
+  assert.equal(input.checked, true);
+  new WindowFilter(app.element).apply('unrelated');
+  assert(row.classList.contains('improved-hidden'));
+  workspace.detach(app);
+  assert.equal(label.parentElement, row);
+  assert.equal(row.querySelector('.improved-row-actions'), null);
+  assert.equal(app.element.querySelector('fieldset > legend').textContent, 'Options');
+});

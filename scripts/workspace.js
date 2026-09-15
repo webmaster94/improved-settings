@@ -219,10 +219,15 @@ export class SettingWorkspace {
       actions.append(this.iconButton('fa-regular fa-star', () => this.toggleFavorite(tools.record), 'Toggle favorite'));
       actions.append(this.iconButton('fa-solid fa-passport', () => this.copy(locationText(this.location(tools.record))), 'Copy location'));
       actions.append(this.iconButton('fa-solid fa-arrow-rotate-left', () => this.reset([tools.record], tools.record.label), 'Reset to default'));
-      tools.append(actions);
+      tools.actions = actions;
       record.row.append(tools);
     }
     tools.record = record;
+    const actions = tools.actions;
+    if (!record.row.contains(actions)) this.placeActions(record, actions);
+    record.row.classList.add('improved-setting-row');
+    actions.setAttribute('role', 'group');
+    actions.setAttribute('aria-label', `Actions for ${record.label}`);
     const badge = tools.querySelector('.improved-badges');
     badge.replaceChildren();
     const scope = { client: ['fa-display', 'Browser', 'Applies to this browser'], user: ['fa-user', 'Player', 'Applies to this user in this world'], world: ['fa-globe', 'World', 'Applies to the entire world'] }[record.scope];
@@ -235,12 +240,31 @@ export class SettingWorkspace {
     if (record.different) badge.append(this.chip('fa-sliders', 'Modified', 'Different from default'));
     if (record.hasDefault) badge.append(this.chip('fa-circle-info', 'Default', `Current: ${this.display(record.read())} · Default: ${this.display(record.defaultValue)}`, 'improved-default'));
     record.row.classList.toggle('improved-dirty', record.dirty);
-    const actions = tools.querySelector('.improved-row-actions');
     const [favorite, , reset] = actions.querySelectorAll('button');
     favorite.querySelector('i').className = this.favorites.has(record.id) ? 'fa-solid fa-star' : 'fa-regular fa-star';
     favorite.setAttribute('aria-pressed', String(this.favorites.has(record.id)));
     reset.disabled = !record.hasDefault || !record.canWrite || !record.different;
     reset.title = !record.hasDefault ? 'Default is unknown for this control' : !record.canWrite ? 'This control cannot be reset here' : 'Preview reset to default';
+  }
+
+  placeActions(record, actions) {
+    // Keep the real label and its input association. Buttons are siblings of the label,
+    // so using an action cannot activate a checkbox through label default behavior.
+    const label = [...record.row.querySelectorAll('label, [data-label], .setting-name')]
+      .find(label => !label.closest('[data-improved-ui]') && !label.querySelector(editableSelector));
+    if (label) {
+      const heading = this.document.createElement('div');
+      heading.className = 'improved-setting-heading';
+      const style = this.document.defaultView.getComputedStyle(label);
+      heading.style.flex = style.flex || '2';
+      heading.style.fontWeight = style.fontWeight;
+      heading.style.gridColumn = style.gridColumn;
+      label.before(heading);
+      heading.append(label, actions);
+    } else {
+      // Unusual inline-label controls keep their existing DOM structure.
+      record.row.prepend(actions);
+    }
   }
 
   iconButton(icon, action, label) {
@@ -297,6 +321,9 @@ export class SettingWorkspace {
     state?.abort?.abort();
     clearTimeout(state?.timer);
     state?.root?.querySelectorAll('.improved-row-tools').forEach(el => el.remove());
+    state?.root?.querySelectorAll('.improved-row-actions').forEach(el => el.remove());
+    state?.root?.querySelectorAll('.improved-setting-heading').forEach(el => el.replaceWith(...el.childNodes));
+    state?.root?.querySelectorAll('.improved-setting-row').forEach(el => el.classList.remove('improved-setting-row'));
     state?.root?.querySelectorAll('.improved-dirty').forEach(el => el.classList.remove('improved-dirty'));
     state?.root?.querySelectorAll('.improved-dirty-tab').forEach(el => { el.classList.remove('improved-dirty-tab'); delete el.dataset.improvedDirtyCount; });
     this.windows.delete(app);
