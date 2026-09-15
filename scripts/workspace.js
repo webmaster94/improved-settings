@@ -153,7 +153,7 @@ export class SettingWorkspace {
       Object.assign(record, { row, controls, control, state, present: true, namespace, menuKey: state.context.menuKey, key, settingId,
         label: meta.label || (setting && !fieldPath.length ? this.game.i18n.localize(setting.name) : base.label), path, text: base.text,
         read, saved, sensitive, scope: meta.scope ?? setting?.scope, requiresReload: meta.requiresReload ?? setting?.requiresReload,
-        access: meta.access ?? (setting?.scope === 'world' || this.game.settings.menus?.get(state.context.menuKey)?.restricted ? 'gm' : setting || meta.scope ? 'user' : undefined),
+        access: meta.access ?? ((meta.scope ?? setting?.scope) === 'world' || this.game.settings.menus?.get(state.context.menuKey)?.restricted ? 'gm' : setting || meta.scope ? 'user' : undefined),
         saveMode: meta.saveMode || (state.context.main ? 'submit' : state.app.options?.form?.submitOnChange ? 'immediate' : 'unknown'),
         defaultValue: copyValue(Object.hasOwn(meta, 'default') ? meta.default : fieldValue(setting?.default, fieldPath)),
         hasDefault: !sensitive && (Object.hasOwn(meta, 'default') || (!!setting && Object.hasOwn(setting, 'default'))),

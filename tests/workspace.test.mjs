@@ -139,6 +139,19 @@ test('custom adapters supply nested locations, defaults and immediate save behav
   } finally { remove(); }
 });
 
+test('custom world metadata uses a GM chip and honors an explicit access override', () => {
+  let access;
+  const remove = registerControlAdapter('test-world-access', { selector: '[data-world]', describe: () => ({ scope: 'world', access }) });
+  try {
+    const { workspace, app } = setup('<div class="form-group" data-world><label>Shared preference</label><input name="shared"></div>');
+    assert.equal(workspace.records()[0].access, 'gm');
+    access = 'user';
+    workspace.invalidate(app);
+    workspace.attach(app, { namespace: 'sample' });
+    assert.equal(workspace.records()[0].access, 'user');
+  } finally { remove(); }
+});
+
 test('surrounding mode reveals search-filtered rows while preserving native hidden fields and highlights', () => {
   const { app } = setup('<nav><a data-tab="one" data-group="main">One</a></nav><section data-tab="one" data-group="main"><div class="form-group"><label>Limit</label><input name="limit"></div><div class="form-group"><label>Sound</label><input name="sound"></div><div class="form-group" hidden><label>Secret limit</label><input name="hiddenLimit"></div></section>');
   const filter = new WindowFilter(app.element);

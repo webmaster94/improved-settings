@@ -560,7 +560,7 @@ export function install() {
   windowObserver.observe(document.body, { childList: true });
 
   installed = {
-    version: "0.2.1",
+    version: "0.2.2",
     registerControlAdapter(id, adapter) {
       const remove = registerControlAdapter(id, adapter);
       for (const app of workspace.windows.keys()) workspace.invalidate(app);
