@@ -95,6 +95,8 @@ Current values and baselines stay in open-window trackers. The discovery index s
 
 ## Limits
 
+Setting actions sit beside native labels in a temporary heading wrapper. The wrapper retains the original label node and its input association. Search removes only the action elements from cloned text, leaving the native label searchable. Detaching a window removes the wrapper and restores the label to its original parent. Coverage counts remain available through `api.coverage()` without a panel in Game Settings.
+
 - Runtime-only controls cannot be known before rendering unless their owner supplies index entries. Coverage distinguishes observed controls from descriptions and unknown windows; none of these counts establishes that every lazy tab is indexed.
 - A native setting that conditionally hides another remains responsible for that condition. Search does not override permissions or make native-hidden inputs visible.
 - Launchers that share an application class are distinguished by the clicked button. A directly opened instance of an ambiguous shared class is not guessed.

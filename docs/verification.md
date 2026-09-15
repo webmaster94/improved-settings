@@ -2,6 +2,17 @@
 
 Verified on September 15, 2026.
 
+## Version 0.2.3
+
+- Removed idle search instructions and the coverage panel. Match counts and recovery actions remain available during searches.
+- Moved actions beside the original setting label and added light dividers between rows. Visual review covered Automated Animations and core User Interface fieldsets, including narrow label columns.
+- All 21 automated tests pass. The new label test verifies that action buttons do not toggle the checkbox, the native label still does, search still reads the label, and detach restores the original form.
+- Local v13.351 passes all 45 live checks with API version 0.2.3. Forge v14.364 passed the 26 workspace checks before release.
+- The public manifest and archive report 0.2.3. The downloaded ZIP matches the local artifact, SHA256 `CA494CA87B3C16B55D61352359A9C86D5D86798280B79EF1D70C9A0CB4F51DE0`.
+- Forge Bazaar reported `Installed Improved Settings 0.2.3` using the versioned manifest. The stable latest manifest also returns 0.2.3.
+- After restart, the installed module and API both report 0.2.3, active and saved enablement are true, and no preview global exists. All 45 live checks pass from the installed package. No console errors were captured during those checks. [Recorded results](forge-release-0.2.3-results.json).
+- Final installed visual review confirmed actions beside Automated Animations setting names, chips below, and the row dividers.
+
 ## Version 0.2.2
 
 - Final follow-up for custom integrations that supply world scope: use the GM access chip unless the integration explicitly overrides access. 20 automated tests pass, including this metadata case.
