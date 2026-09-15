@@ -2,6 +2,15 @@
 
 Verified on September 15, 2026.
 
+## Version 0.2.2
+
+- Final follow-up for custom integrations that supply world scope: use the GM access chip unless the integration explicitly overrides access. 20 automated tests pass, including this metadata case.
+- Rechecked the final v13.351 package: API 0.2.2 and all 24 workspace checks passed. The 19 search/docking/modal checks passed for the unchanged 0.2.1 behavior below.
+- Downloaded the public 0.2.2 manifest and ZIP and verified the archive matches the local artifact. SHA256 `F7239DE9B5706906947522AA04B58AA2382FD787E52E402059F720FB5A4FCB77`.
+- Forge reported `Installed Improved Settings 0.2.2` using the versioned manifest. The stable latest manifest subsequently returned 0.2.2 as well.
+- After restarting Tyranny of Thay, module and API versions were both 0.2.2, saved enablement and active state were true, and no preview global was present. All 43 live checks passed from the installed package. [Recorded results](forge-release-0.2.2-results.json).
+- Final visual and DOM checks confirmed the 1040-pixel window, equal search/Show row, sidebar Favorites, inline icons, and scope chips for all seven core UI controls. No console errors were captured during the installed-release checks.
+
 ## Version 0.2.1
 
 - The original core UI reproduction found seven controls with empty scope badges. Fully qualified nested field mapping now supplies browser scope for all seven on v13.351 and Forge v14.364, independently of reload metadata.
