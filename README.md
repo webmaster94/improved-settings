@@ -22,7 +22,7 @@ In Foundry's Install Module dialog, paste this manifest URL and click Install:
 https://github.com/webmaster94/improved-settings/releases/latest/download/module.json
 ```
 
-On Forge, open the Bazaar, choose **Install from Manifest**, and paste the same URL. Enable **Improved Settings** in the world's Module Management and reload the world.
+On Forge, open the Bazaar, choose **Install from Manifest**, and paste the same URL. Restart the game server from My Foundry if Forge says the running game needs a restart. Enable **Improved Settings** in the world's Module Management and reload the world.
 
 You can also extract the [release ZIP](https://github.com/webmaster94/improved-settings/releases/latest) so `Data/modules/improved-settings/module.json` exists. Restart Foundry if it was running when the module folder was added.
 
