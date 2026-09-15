@@ -5,10 +5,28 @@ const ROW = '.form-group, [data-setting-id], [data-setting-key], .setting, .sett
 const adapters = new Map();
 
 /** Optional semantic adapters belong to the control library, not a module allowlist. */
-export function registerControlAdapter(id, { selector, text }) {
+export function registerControlAdapter(id, { selector, text, describe }) {
   if (!id || typeof selector !== "string") throw new TypeError("An adapter needs an id and a CSS selector");
-  adapters.set(id, { selector, text });
+  adapters.set(id, { selector, text, describe });
   return () => adapters.delete(id);
+}
+
+export function controlMetadata(row, context) {
+  for (const adapter of adapters.values()) {
+    if (adapter.describe && row.matches(adapter.selector)) return adapter.describe(row, context) ?? {};
+  }
+  return {};
+}
+
+export function describeRow(row, root) {
+  const controls = [...row.querySelectorAll('[name]:not([data-improved-ui])')].filter(el => !el.closest('[data-improved-ui]'));
+  const field = controls.find(el => !['hidden', 'button', 'submit'].includes(el.type));
+  const label = row.querySelector('label')?.textContent.trim() || field?.getAttribute('aria-label') || row.getAttribute('aria-label') || row.textContent.trim().slice(0, 120);
+  const path = tabPath(row, root).map(step => {
+    const nav = [...root.querySelectorAll('nav [data-tab], [role="tablist"] [data-tab]')].find(el => el.dataset.tab === step.tab && (el.dataset.group ?? '') === step.group);
+    return { ...step, label: nav?.textContent.trim() || step.tab };
+  });
+  return { key: field?.name || field?.getAttribute('name') || row.dataset.settingId || row.dataset.settingKey || label, label, text: rowText(row), path };
 }
 
 export function elementOf(app) {
@@ -87,17 +105,18 @@ export class WindowFilter {
     this.decorated.add(node);
   }
 
-  apply(query, extras = new Map()) {
+  apply(query, extras = new Map(), { predicate = () => true, showSurrounding = false, filtered = false } = {}) {
     this.clear();
-    const rows = collectRows(this.root);
-    const records = rows.map(row => ({ row, text: rowText(row), path: tabPath(row, this.root) }));
-    if (!query.trim()) return { records, count: records.length };
-    const hits = records.filter(record => matches(`${record.text} ${extras.get(record.row) ?? ""}`, query));
+    const records = this.records ??= collectRows(this.root).map(row => ({ row, ...describeRow(row, this.root) }));
+    const rows = records.map(record => record.row);
+    if (!query.trim() && !filtered) return { records, count: records.length };
+    const hits = records.filter(record => matches(`${record.text} ${extras.get(record.row) ?? ""}`, query) && predicate(record.row));
     const hitRows = new Set(hits.map(hit => hit.row));
     for (const { row } of records) {
       // A wrapper containing a matching child must remain reachable.
       const keep = hitRows.has(row) || hits.some(hit => row.contains(hit.row));
-      if (!keep) this.mark(row, "improved-hidden");
+      if (!keep && !showSurrounding) this.mark(row, "improved-hidden");
+      if (hitRows.has(row) && showSurrounding) this.mark(row, "improved-match");
     }
     const tabs = [...this.root.querySelectorAll('button[data-tab], a[data-tab], [role="tab"][data-tab]')];
     for (const tab of tabs) {
@@ -132,11 +151,11 @@ export class WindowFilter {
     const groups = new Set();
     for (const { row } of records) for (let parent = row.parentElement; parent && parent !== this.root; parent = parent.parentElement) {
       if (!parent.matches('div, section, fieldset, details') || parent.matches('.tab, [data-tab], .window-content, [data-improved-ui]')) continue;
-      if (parent.querySelector('nav, footer, [role="tablist"], [data-improved-ui], input[type="search"]')) continue;
+      if (parent.querySelector('nav, footer, [role="tablist"], [data-improved-toolbar], .improved-child-banner, input[type="search"]')) continue;
       groups.add(parent);
     }
     for (const group of groups) {
-      if (!hits.some(hit => group.contains(hit.row)) && !group.querySelector('.improved-match')) this.mark(group, "improved-hidden");
+      if (!showSurrounding && !hits.some(hit => group.contains(hit.row)) && !group.querySelector('.improved-match')) this.mark(group, "improved-hidden");
     }
     return { records, count: hits.length };
   }

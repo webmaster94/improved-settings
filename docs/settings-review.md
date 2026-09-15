@@ -16,7 +16,7 @@ Custom settings menus are registered separately from their contents. The standar
 
 Primary API references: [SearchFilter v14](https://foundryvtt.com/api/v14/classes/foundry.applications.ux.SearchFilter.html), [ClientSettings v13](https://foundryvtt.com/api/v13/classes/foundry.helpers.ClientSettings.html), and [SettingsConfig v14](https://foundryvtt.com/api/classes/foundry.applications.settings.SettingsConfig.html). Implementation details above were checked against both locally installed source trees.
 
-## Other gaps worth addressing next
+## Gaps addressed in 0.2.0
 
 1. **Who a setting affects.** A consistent badge could distinguish this browser, this user, and the whole world. The setting registry already carries this information for registered settings; arbitrary object fields need metadata from their owner.
 2. **Changed values.** A “different from default” filter would help diagnose a world with many modules. Unsaved edits need a separate indicator so a search cannot make them easy to forget.
@@ -25,4 +25,4 @@ Primary API references: [SearchFilter v14](https://foundryvtt.com/api/v14/classe
 5. **Shareable setting locations.** Copying a package ID, setting key, and tab path would make support instructions precise without sharing the user's values.
 6. **A standard menu-search contract.** Module authors could expose labels, keys, hints, tab paths, and row selectors directly. This would eliminate guesswork for runtime-generated forms. Improved Settings' index-provider API is a starting point.
 
-This release adds search coverage feedback, empty-result guidance, clear buttons, and a keyboard shortcut. The other ideas above are proposals, not implemented features.
+Version 0.2.0 implements these proposals through a shared control model, plus result paths with direct navigation, observed/description/unknown coverage, targeted empty-result recovery, surrounding settings, and browser-local favorites. See the README for behavior and limits. Custom forms still need metadata to establish reliable defaults and save state; detection alone cannot infer those facts.

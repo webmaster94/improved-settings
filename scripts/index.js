@@ -1,5 +1,5 @@
 import { matches } from "./search.js";
-import { collectRows, rowText } from "./dom.js";
+import { collectRows, rowText, describeRow } from "./dom.js";
 
 const strings = source => [...source.matchAll(/["'`]([^"'`\n\r]{2,240})["'`]/g)].map(match => match[1]);
 
@@ -44,16 +44,18 @@ export class MenuIndex {
     this.busy = true;
     this.changed();
     const queue = [...this.game.settings.menus.entries()].filter(([, menu]) => this.permitted(menu));
+    const accessible = new Set(queue.map(([key]) => key));
+    for (const key of this.menus.keys()) if (!accessible.has(key)) this.menus.delete(key);
     // Bound concurrency even in worlds with hundreds of menus.
     const worker = async () => {
       while (queue.length) {
         const [key, menu] = queue.shift();
         if (this.menus.has(key)) continue;
-        const entry = { key, menu, texts: [], learned: [], state: "indexing", errors: [] };
+        const entry = { key, menu, texts: [], learned: [], records: [], state: "indexing", errors: [] };
         this.menus.set(key, entry);
         try { await this.indexMenu(entry); }
         catch (error) { entry.errors.push(String(error.message ?? error)); }
-        entry.state = entry.texts.length ? "indexed" : "unopened";
+        entry.state = entry.learned.length ? 'observed' : entry.texts.length ? "indexed" : "unopened";
       }
     };
     try { await Promise.all([worker(), worker(), worker(), worker()]); }
@@ -115,7 +117,10 @@ export class MenuIndex {
         // Parse inertly. No HTML is ever inserted into a live page for indexing.
         const fragment = this.document.createElement("template");
         fragment.innerHTML = translated.replace(/\{\{[\s\S]*?\}\}/g, " ");
-        for (const row of collectRows(fragment.content)) entry.texts.push(rowText(row));
+        for (const row of collectRows(fragment.content)) {
+          entry.texts.push(rowText(row));
+          entry.records.push({ ...describeRow(row, fragment.content), source: 'description' });
+        }
         entry.texts.push(...this.translatedStrings(template));
         for (const match of template.matchAll(/\{\{[~#]?\s*>\s*["']([^"']+)["']/g)) await inspectTemplate(match[1], depth + 1);
       } catch (error) { entry.errors.push(`${path}: ${error.message}`); }
@@ -135,6 +140,7 @@ export class MenuIndex {
     if (provider) {
       const records = await provider(menu);
       entry.texts.push(...records.map(record => typeof record === "string" ? record : [record.label, record.hint, record.key, ...(record.choices ?? [])].join(" ")));
+      entry.records.push(...records.filter(record => typeof record === 'object').map(record => ({ ...record, text: [record.label, record.hint, record.key, ...(record.choices ?? [])].join(' '), source: 'provider', supplied: true })));
     }
     entry.texts = [...new Set(entry.texts.map(text => text.trim()).filter(Boolean))];
   }
@@ -142,11 +148,17 @@ export class MenuIndex {
   learn(key, records) {
     let entry = this.menus.get(key);
     if (!entry) {
-      entry = { key, texts: [], learned: [], state: "observed", errors: [] };
+      entry = { key, texts: [], learned: [], records: [], state: "observed", errors: [] };
       this.menus.set(key, entry);
     }
     // Preserve previously visited lazy tabs, but never store form values.
     entry.learned = [...new Set([...entry.learned, ...records.map(record => record.text)])];
+    for (const { key: fieldKey, label, text, path } of records) {
+      const record = { key: fieldKey, label, text, path, source: 'observed' };
+      const at = entry.records.findIndex(old => old.key === fieldKey && JSON.stringify(old.path ?? []) === JSON.stringify(path ?? []));
+      if (at < 0) entry.records.push(record);
+      else entry.records[at] = { ...entry.records[at], ...record };
+    }
     entry.state = "observed";
   }
 
@@ -158,6 +170,17 @@ export class MenuIndex {
 
   coverage() {
     const entries = [...this.menus.values()];
-    return { total: entries.length, indexed: entries.filter(entry => entry.texts.length || entry.learned.length).length, busy: this.busy };
+    const observed = entries.filter(entry => entry.state === 'observed').length;
+    const described = entries.filter(entry => entry.state !== 'observed' && entry.texts.length).length;
+    return { total: entries.length, indexed: observed + described, observed, described, unknown: entries.length - observed - described, busy: this.busy };
+  }
+
+  results(key, query) {
+    const entry = this.menus.get(key);
+    if (!entry) return [];
+    const records = (entry.records ?? []).filter(record => matches(record.text ?? record.label ?? '', query));
+    if (!records.length && query.trim()) return entry.texts.filter(text => matches(text, query)).map(text => ({ key: '', label: text, text, path: [], source: 'description' }));
+    const unique = new Map(records.map(record => [record.key + JSON.stringify(record.path ?? []), record]));
+    return [...unique.values()];
   }
 }

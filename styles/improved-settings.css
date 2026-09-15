@@ -9,6 +9,32 @@
 .improved-settings aside input[type=search]::placeholder { font-family: inherit; font-weight: normal; top: auto; }
 .improved-settings .improved-status { font-size: var(--font-size-12, 12px); color: var(--color-text-secondary); line-height: 1.35; }
 .improved-settings .improved-coverage { font-size: var(--font-size-11, 11px); color: var(--color-text-subtle); line-height: 1.3; }
+.improved-settings .improved-options { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.improved-settings .improved-options label { display: flex; align-items: center; gap: 6px; flex: 1; }
+.improved-settings .improved-filter { width: auto; flex: 1; min-width: 140px; }
+.improved-settings .improved-action, .improved-settings-child .improved-action { width: auto; min-height: 24px; height: auto; line-height: 1.35; padding: 4px 8px; font-size: var(--font-size-12, 12px); white-space: normal; }
+.improved-row-tools { flex: 0 0 100%; width: 100%; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; margin-top: 5px; font-size: var(--font-size-11, 11px); }
+.improved-row-tools .improved-badges { flex: 1; color: var(--color-text-secondary); }
+.improved-row-tools .improved-default { display: block; max-width: 100%; overflow-wrap: anywhere; padding-block: 5px; }
+.improved-row-actions summary, .improved-results summary, .improved-coverage summary, .improved-favorites summary { cursor: pointer; }
+.improved-row-actions[open] { flex: 0 0 100%; }
+.improved-row-actions button { margin: 4px 5px 0 0; }
+.improved-row-tools, .improved-results { grid-column: 1 / -1; }
+.improved-settings .form-group:has(> .improved-row-tools), .improved-settings-child .form-group:has(> .improved-row-tools) { flex-wrap: wrap; }
+.improved-results { flex: 0 0 100%; padding: 5px 0; font-size: var(--font-size-12, 12px); }
+.improved-result-list, .improved-favorite-list { display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow-y: auto; padding: 6px 0; }
+.improved-result-list button { text-align: start; }
+.improved-favorite { display: flex; gap: 6px; }
+.improved-favorite > button:first-child { flex: 1; text-align: start; }
+.improved-coverage-body { max-height: 220px; overflow-y: auto; }
+.improved-edit-summary, .improved-recovery { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.improved-edit-summary[hidden] { display: none; }
+.improved-edit-summary { border-inline-start: 3px solid var(--color-warm-1, orange); padding: 6px; font-size: var(--font-size-12, 12px); }
+.improved-dirty-tab::before { content: '• '; color: var(--color-warm-1, orange); }
+.improved-location-target { outline: 2px solid var(--color-warm-1, orange); outline-offset: 2px; }
+.improved-child-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.improved-child-status { flex: 1; min-width: 180px; }
+.improved-reset-preview { max-height: 55vh; overflow: auto; }
 .improved-settings .improved-match, .improved-settings-child .improved-match {
   outline: 2px solid var(--color-warm-1, #dd9b42);
   outline-offset: -2px;

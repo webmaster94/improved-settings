@@ -24,7 +24,7 @@ A second narrow wrapper handles DialogV2's first display. When a dialog contains
 ```js
 const api = game.modules.get("improved-settings").api;
 api.search("concentration", "automation"); // Settings query, then module query
-api.coverage();                         // Described windows / discovered windows
+api.coverage();                         // total, observed, described, unknown, busy
 api.diagnostics();                      // Per-menu index state and template errors
 await api.refreshIndex();
 ```
@@ -44,7 +44,9 @@ const remove = api.registerMenuIndexer("your-package.configuration", async menu 
 ]);
 ```
 
-Return an array of strings or records with `key`, `label`, `hint`, and `choices`. Supply descriptions, not saved values or credentials. The callback supplements automatic discovery and should be free of side effects. Call the returned function to unregister it.
+Return an array of strings or records with `key`, `label`, `hint`, and `choices`. Records can also supply `path`, `settingId`, `default`, `scope`, `requiresReload`, and `saveMode`. Supply descriptions and declared metadata, never current values or credentials. The callback supplements automatic discovery and should be free of side effects. Call the returned function to unregister it.
+
+`path` is an ordered array such as `[{ group: "primary", tab: "appearance", label: "Appearance" }]`. A matching field name or `selector` associates a provider record with the rendered row. `settingId` maps a control to a complete registered setting, never one subfield of a stored object.
 
 ### Describe a custom control convention
 
@@ -59,11 +61,39 @@ const remove = api.registerControlAdapter("my-control-library", {
 });
 ```
 
-Use a selector that identifies one meaningful row. The text callback is optional; standard DOM text and field names are used by default. Tabs still follow the standard `data-group` and `data-tab` conventions. Reopen the form or change the search after registering an adapter.
+Use a selector that identifies one meaningful row. The text callback is optional; standard DOM text and field names are used by default. Tabs still follow the standard `data-group` and `data-tab` conventions. Registering or removing an adapter refreshes open trackers.
+
+### Provide defaults and save behavior
+
+An adapter can add a synchronous `describe(row, { app, namespace, menuKey })` callback:
+
+```js
+describe: row => ({
+  key: "distance",
+  default: 30,
+  scope: "world",
+  requiresReload: false,
+  saveMode: "submit",
+  getValue: (row, app) => Number(row.querySelector("input").value),
+  getSavedValue: (row, app) => app.savedConfiguration.distance,
+  setValue: (row, value, app) => {
+    const input = row.querySelector("input");
+    input.value = value;
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+})
+```
+
+The example assumes the owning application exposes `savedConfiguration`. Supply its actual saved-value reader. `saveMode` accepts `submit`, `immediate`, or `unknown`. Custom readers and writers are optional for standard inputs, selects, textareas, and supported Foundry custom elements. Adapters must describe rows containing such controls; canvas-only widgets need a DOM integration.
+
+Current values and baselines stay in open-window trackers. The discovery index strips values from observed rows, and persisted favorites contain location descriptors only. Reset writes through the form's controls or the adapter, never directly to `game.settings`. It previews supported changes and rechecks for changed, removed, or disabled controls before applying them.
+
+`await api.openLocation(location)` accepts a saved location descriptor with `namespace`, optional `menuKey`, `key` or `settingId`, and a tab `path`. It opens the registered launcher, follows native tab actions, and focuses the matching rendered row. Conditional or absent controls remain unavailable. Locations do not encode field values.
 
 ## Limits
 
-- Runtime-only controls cannot be known before rendering unless their owner supplies index entries. The coverage count means a window has searchable descriptions; it is not a count of fully indexed windows.
+- Runtime-only controls cannot be known before rendering unless their owner supplies index entries. Coverage distinguishes observed controls from descriptions and unknown windows; none of these counts establishes that every lazy tab is indexed.
 - A native setting that conditionally hides another remains responsible for that condition. Search does not override permissions or make native-hidden inputs visible.
 - Launchers that share an application class are distinguished by the clicked button. A directly opened instance of an ambiguous shared class is not guessed.
 - Text learned from lazy tabs is retained for the session. Rebuilding the index discards that learned text, and open windows repopulate it.

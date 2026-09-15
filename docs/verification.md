@@ -2,6 +2,17 @@
 
 Verified on September 15, 2026.
 
+## Version 0.2.0
+
+- Local v13.351 and Forge v14.364 each passed 40 live checks with the final candidate: 15 search/placement checks, 4 DialogV2 checks, and 21 workspace checks.
+- 18 automated tests passed. New coverage includes typed defaults, edited fields hidden by search, saved-value confirmation, reset previews and cancellation, controls changed or disabled during a preview, replaced controls, captured input events, favorite privacy, metadata adapters, and surrounding mode.
+- The new live fixture verifies path previews, direct parent/subtab navigation, scope/reload labels, dirty summaries and tabs, Show edits, favorites, surrounding context, changed filtering, per-setting and module resets, empty-result recovery, and coverage categories. It stages synthetic values without persisting them.
+- A separate synthetic `clientSettingChanged` event verified the saved-reload summary on Forge without changing a stored setting.
+- Warm searches in the Forge list of 659 tracked controls measured 93, 84, and 83 ms after caching row descriptions and control mappings. These are browser measurements from one session, not a cross-device benchmark.
+- Local v14.360 was verified for the earlier release below; the 0.2.0 v14 checks use Forge v14.364.
+
+## Earlier releases
+
 | Environment | Result |
 | --- | --- |
 | Local Foundry v13.351, `FoundryVTT_Next`, test world | 15 framework checks and 4 native-dialog checks passed |

@@ -3,7 +3,7 @@ import path from "node:path";
 const root = path.resolve(import.meta.dirname, "..");
 const dist = path.join(root, "dist");
 await fs.mkdir(dist, { recursive: true });
-const files = ["search.js", "dom.js", "index.js", "main.js"];
+const files = ["search.js", "dom.js", "index.js", "workspace.js", "main.js"];
 let bundle = "// Improved Settings: temporary browser verification bundle. Reload removes it.\n";
 for (const file of files) {
   const source = await fs.readFile(path.join(root, "scripts", file), "utf8");
