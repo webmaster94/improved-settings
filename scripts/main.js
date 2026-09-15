@@ -48,11 +48,7 @@ export function install() {
     input.autocomplete = "off";
     input.spellcheck = false;
     input.value = value;
-    const clear = createUI("button", "improved-clear", "×");
-    clear.type = "button";
-    clear.title = `Clear ${label.toLowerCase()}`;
-    clear.setAttribute("aria-label", clear.title);
-    const update = () => { clear.disabled = !input.value; handler(input.value); };
+    const update = () => handler(input.value);
     input.addEventListener("input", event => { event.stopPropagation(); update(); });
     input.addEventListener("keydown", event => {
       if (event.key === "Enter" || event.key === "Escape") {
@@ -61,12 +57,10 @@ export function install() {
         if (event.key === "Escape") { input.value = ""; update(); }
       }
     });
-    clear.addEventListener("click", () => { input.value = ""; update(); input.focus(); });
-    clear.disabled = !value;
     caption.append(input);
-    row.append(caption, clear);
+    row.append(caption);
     wrapper.append(row);
-    return { wrapper, input, clear };
+    return { wrapper, input };
   }
 
   function menuKey(button, root) {
@@ -364,7 +358,7 @@ export function install() {
   windowObserver.observe(document.body, { childList: true });
 
   installed = {
-    version: "0.1.0",
+    version: "0.1.1",
     registerControlAdapter,
     registerMenuIndexer: (key, provider) => index.addProvider(key, provider),
     refreshIndex: () => { index.menus.clear(); index.templates.clear(); return index.build(); },
@@ -376,9 +370,7 @@ export function install() {
       controller.query = query;
       controller.moduleQuery = moduleQuery;
       controller.settingBox.input.value = query;
-      controller.settingBox.clear.disabled = !query;
       controller.moduleBox.input.value = moduleQuery;
-      controller.moduleBox.clear.disabled = !moduleQuery;
       controller.apply();
       return true;
     },
