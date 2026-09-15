@@ -1,0 +1,101 @@
+{
+  "date": "2026-09-15",
+  "installation": {
+    "executionId": "script-1789468161933-tmx442i7",
+    "success": true,
+    "result": {
+      "foundry": "14.364",
+      "version": "0.2.0",
+      "api": "0.2.0",
+      "active": true,
+      "enabled": true,
+      "preview": false,
+      "source": [
+        "https://webmaster94-tyranny-of-thay.forge-vtt.com/modules/improved-settings/scripts/main.js"
+      ]
+    },
+    "logs": [],
+    "durationMs": 1,
+    "consoleSinceIdBefore": 19,
+    "consoleSinceIdAfter": 19,
+    "truncated": false
+  },
+  "workspace": {
+    "executionId": "script-1789468162138-oh4731he",
+    "success": true,
+    "result": {
+      "version": "14.364",
+      "passed": 21,
+      "checks": [
+        "Unopened provider results expose their complete setting path",
+        "Selecting a result opens its window and navigates parent and nested tabs",
+        "Custom metadata displays scope and reload requirements",
+        "Unsaved summary persists when search hides an edited setting",
+        "Filtering preserves the hidden edit",
+        "Show edits clears conflicting searches and exposes the edited controls",
+        "Edited tabs are marked independently of search matches",
+        "Confirmed saved values remove the pending-edit indicator",
+        "Favorites persist a custom setting location",
+        "Favorites have a direct navigation list",
+        "Favorite navigation removes conflicting filters",
+        "Surrounding settings restore context without exposing native-hidden controls",
+        "Different-from-default filtering includes supported custom fields",
+        "Per-setting reset presents an exact current-to-default preview",
+        "Reset preview requires an explicit confirmation",
+        "Confirmed reset stages the value without saving the custom form",
+        "Module reset includes editable settings hidden by the active search",
+        "Module reset stages native controls without persisting test values",
+        "Empty results offer a targeted recovery action",
+        "Recovery preserves the settings query while clearing the module filter",
+        "Coverage separates observed, described and undiscovered windows"
+      ]
+    },
+    "logs": [],
+    "durationMs": 14927,
+    "consoleSinceIdBefore": 19,
+    "consoleSinceIdAfter": 23,
+    "truncated": false
+  },
+  "regression": {
+    "executionId": "script-1789468190133-6kvujbeh",
+    "success": true,
+    "result": {
+      "search": {
+        "version": "14.364",
+        "passed": 15,
+        "checks": [
+          "Module filter narrows the category list",
+          "Unknown registered AppV2 opens through its button",
+          "Observed controls make the launcher searchable",
+          "Both parent tabs and both nested subtabs are highlighted",
+          "Highlighted nested tab remains navigable",
+          "Nonmatching settings are filtered",
+          "Search preserves unsaved form values",
+          "Child docks to the right when room is available",
+          "Scaled applications preserve the docking gap",
+          "Moving Settings switches docking to the left",
+          "Live query change narrows every tab to the matching setting",
+          "Empty results explain how to recover",
+          "Clearing search restores all settings",
+          "Clearing preserves edited and unchanged controls",
+          "Closing Settings removes filtering from its surviving child"
+        ]
+      },
+      "modal": {
+        "version": "14.364",
+        "passed": 4,
+        "checks": [
+          "Native settings dialog opens without blocking the parent search",
+          "Main search can receive focus while the dialog is open",
+          "Native dialog controls update from the shared search",
+          "Native dialog action callback still runs exactly once"
+        ]
+      }
+    },
+    "logs": [],
+    "durationMs": 14149,
+    "consoleSinceIdBefore": 23,
+    "consoleSinceIdAfter": 23,
+    "truncated": false
+  }
+}

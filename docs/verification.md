@@ -10,6 +10,10 @@ Verified on September 15, 2026.
 - A separate synthetic `clientSettingChanged` event verified the saved-reload summary on Forge without changing a stored setting.
 - Warm searches in the Forge list of 659 tracked controls measured 93, 84, and 83 ms after caching row descriptions and control mappings. These are browser measurements from one session, not a cross-device benchmark.
 - Local v14.360 was verified for the earlier release below; the 0.2.0 v14 checks use Forge v14.364.
+- Published [0.2.0](https://github.com/webmaster94/improved-settings/releases/tag/v0.2.0), downloaded its manifest and archive anonymously, and verified both manifests report 0.2.0. The public ZIP matched the local artifact, SHA256 `AE1D588D649C1D477EC8EF6A5309C81C6EC4C154C50B6C5F0B86D106EC9AECC5`.
+- Forge Bazaar's Install From Manifest reported `Installed Improved Settings 0.2.0` using the stable public manifest URL. The Tyranny of Thay server was then restarted.
+- After restart, Forge reported installed version and API version `0.2.0`, active and saved enablement both `true`, and no temporary preview. All 40 checks passed again from the installed test files. [Recorded results](forge-release-0.2.0-results.json).
+- The final core User Interface check kept Font Size visible for `font`, hid empty section boxes, and docked the child on the left of Game Settings. The captured console contained no errors during installed-release verification.
 
 ## Earlier releases
 
