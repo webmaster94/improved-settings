@@ -1,0 +1,32 @@
+{
+  "v13": {
+    "checks": [
+      "Native settings dialog opens without blocking the parent search",
+      "Main search can receive focus while the dialog is open",
+      "Native dialog controls update from the shared search",
+      "Native dialog action callback still runs exactly once"
+    ],
+    "passed": 4,
+    "version": "13.351"
+  },
+  "v14": {
+    "checks": [
+      "Native settings dialog opens without blocking the parent search",
+      "Main search can receive focus while the dialog is open",
+      "Native dialog controls update from the shared search",
+      "Native dialog action callback still runs exactly once"
+    ],
+    "passed": 4,
+    "version": "14.360"
+  },
+  "forge": {
+    "version": "14.364",
+    "passed": 4,
+    "checks": [
+      "Native settings dialog opens without blocking the parent search",
+      "Main search can receive focus while the dialog is open",
+      "Native dialog controls update from the shared search",
+      "Native dialog action callback still runs exactly once"
+    ]
+  }
+}

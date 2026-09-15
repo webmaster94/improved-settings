@@ -1,0 +1,65 @@
+{
+  "v13": {
+    "checks": [
+      "Module filter narrows the category list",
+      "Unknown registered AppV2 opens through its button",
+      "Observed controls make the launcher searchable",
+      "Both parent tabs and both nested subtabs are highlighted",
+      "Highlighted nested tab remains navigable",
+      "Nonmatching settings are filtered",
+      "Search preserves unsaved form values",
+      "Child docks to the right when room is available",
+      "Scaled applications preserve the docking gap",
+      "Moving Settings switches docking to the left",
+      "Live query change narrows every tab to the matching setting",
+      "Empty results explain how to recover",
+      "Clearing search restores all settings",
+      "Clearing preserves edited and unchanged controls",
+      "Closing Settings removes filtering from its surviving child"
+    ],
+    "passed": 15,
+    "version": "13.351"
+  },
+  "v14": {
+    "checks": [
+      "Module filter narrows the category list",
+      "Unknown registered AppV2 opens through its button",
+      "Observed controls make the launcher searchable",
+      "Both parent tabs and both nested subtabs are highlighted",
+      "Highlighted nested tab remains navigable",
+      "Nonmatching settings are filtered",
+      "Search preserves unsaved form values",
+      "Child docks to the right when room is available",
+      "Scaled applications preserve the docking gap",
+      "Moving Settings switches docking to the left",
+      "Live query change narrows every tab to the matching setting",
+      "Empty results explain how to recover",
+      "Clearing search restores all settings",
+      "Clearing preserves edited and unchanged controls",
+      "Closing Settings removes filtering from its surviving child"
+    ],
+    "passed": 15,
+    "version": "14.360"
+  },
+  "forge": {
+    "version": "14.364",
+    "passed": 15,
+    "checks": [
+      "Module filter narrows the category list",
+      "Unknown registered AppV2 opens through its button",
+      "Observed controls make the launcher searchable",
+      "Both parent tabs and both nested subtabs are highlighted",
+      "Highlighted nested tab remains navigable",
+      "Nonmatching settings are filtered",
+      "Search preserves unsaved form values",
+      "Child docks to the right when room is available",
+      "Scaled applications preserve the docking gap",
+      "Moving Settings switches docking to the left",
+      "Live query change narrows every tab to the matching setting",
+      "Empty results explain how to recover",
+      "Clearing search restores all settings",
+      "Clearing preserves edited and unchanged controls",
+      "Closing Settings removes filtering from its surviving child"
+    ]
+  }
+}
