@@ -46,7 +46,9 @@ const remove = api.registerMenuIndexer("your-package.configuration", async menu 
 
 Return an array of strings or records with `key`, `label`, `hint`, and `choices`. Records can also supply `path`, `settingId`, `default`, `scope`, `requiresReload`, and `saveMode`. Supply descriptions and declared metadata, never current values or credentials. The callback supplements automatic discovery and should be free of side effects. Call the returned function to unregister it.
 
-`path` is an ordered array such as `[{ group: "primary", tab: "appearance", label: "Appearance" }]`. A matching field name or `selector` associates a provider record with the rendered row. `settingId` maps a control to a complete registered setting, never one subfield of a stored object.
+`path` is an ordered array such as `[{ group: "primary", tab: "appearance", label: "Appearance" }]`. A matching field name or `selector` associates a provider record with the rendered row. `settingId` names a registered setting or a fully qualified field beneath it, such as `package.preferences.theme`. The longest registered prefix supplies metadata; saved/default values are read only at the remaining field path. A reset changes the rendered control, never the complete parent object.
+
+Adapters may supply `access: "gm"` or `access: "user"` separately from scope. Without an override, world settings and restricted menus receive a GM access chip; recognized client/user preferences receive user access metadata. This describes the form's access rules and does not change them. Scope and reload chips are independent. Unknown scope remains explicit.
 
 ### Describe a custom control convention
 

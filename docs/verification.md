@@ -2,6 +2,14 @@
 
 Verified on September 15, 2026.
 
+## Version 0.2.1
+
+- The original core UI reproduction found seven controls with empty scope badges. Fully qualified nested field mapping now supplies browser scope for all seven on v13.351 and Forge v14.364, independently of reload metadata.
+- 19 automated tests pass, including a regression that compares and resets a nested field without changing or exposing sibling values.
+- Local v13 passes 24 workspace checks and 19 search/docking/DialogV2 checks. The workspace checks include sidebar Favorites, equal search/Show widths, and inline star/copy controls.
+- The docking fixture explicitly reserves space for its child window; the wider default no longer accidentally removes the test's claimed available space on a 1280-pixel viewport.
+- Visual review on Forge checked the chip footer, native copy icon, outline star, sidebar placement, and shared search row.
+
 ## Version 0.2.0
 
 - Local v13.351 and Forge v14.364 each passed 40 live checks with the final candidate: 15 search/placement checks, 4 DialogV2 checks, and 21 workspace checks.

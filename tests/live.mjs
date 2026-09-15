@@ -20,11 +20,13 @@ export async function runLiveVerification(api = game.modules.get("improved-setti
     _replaceHTML(html, content) { content.innerHTML = html; }
   }
   const settings = game.settings.sheet;
+  const originalWidth = settings.options.position.width;
   let app;
   try {
     game.settings.registerMenu("improved-settings", "qa", { name: "Framework verification", label: "Open verification", type: FrameworkTestWindow, restricted: true });
     await settings.render({ force: true, resetTabs: true });
-    settings.setPosition({ left: 12, top: 30 });
+    // Reserve actual space for the fixture beside the wider default Settings window.
+    settings.setPosition({ left: 12, top: 30, width: Math.min(780, window.innerWidth - 456) });
     api.search("", "improved");
     check(settings.element.querySelectorAll('aside [data-tab]:not(.improved-hidden)').length === 1, "Module filter narrows the category list");
     settings.element.querySelector(`[data-key="${key}"]`).click();
@@ -66,6 +68,7 @@ export async function runLiveVerification(api = game.modules.get("improved-setti
     await app?.close();
     game.settings.menus.delete(key);
     await settings.render({ force: true, resetTabs: true });
+    settings.setPosition({ width: originalWidth });
     api.search("");
   }
 }

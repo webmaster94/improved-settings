@@ -18,13 +18,13 @@ Filtering preserves form fields and unsaved values. It does not disable controls
 
 - Expand matching results beneath a custom-window button to see setting names and tab paths. Click a result to open that location. Description-only matches may require finding the control after opening the window.
 - Search coverage separates windows with observed controls, windows with descriptions only, and undiscovered windows. Observed does not mean every lazy tab has been visited.
-- The **Show** filter offers different-from-default settings, unsaved or unconfirmed edits, and favorites. Edited categories and tabs remain marked when a search hides their fields. **Show edits** clears conflicting searches.
-- **Setting actions** contains the favorite star, Copy location, current/default information, and a per-setting reset. Favorites belong to this browser, world, and user. Copied locations and favorites contain paths and descriptions, never setting values.
-- **Reset module…** previews changes in the selected category, including its open custom windows and rows hidden by these filters. Each reset shows current and default values before confirmation. Unopened custom controls, unknown defaults, and unsupported controls are excluded. Ordinary forms still need their own Save button; forms that save on change can apply a reset immediately.
-- Scope labels identify this browser, this user, or the entire world when metadata is available. Reload labels and a summary of saved settings explain pending reload requirements.
+- Search and **Show** share one row in a wider default window. Show offers all settings, different-from-default settings, and unsaved or unconfirmed edits. Edited categories and tabs remain marked when a search hides their fields. **Show edits** clears conflicting searches.
+- Each setting has an outline/filled favorite star, Foundry's passport/book Copy location icon, and a reset arrow. Favorites appear above Core in the module sidebar and belong to this browser, world, and user. Copied locations and favorites contain paths and descriptions, never setting values.
+- The reset arrow beside **Show** previews changes in the selected category, including its open custom windows and rows hidden by these filters. Each reset shows current and default values before confirmation. Unopened custom controls, unknown defaults, and unsupported controls are excluded. Ordinary forms still need their own Save button; forms that save on change can apply a reset immediately.
+- Compact chips at the bottom of each setting show browser, player, or world scope, user/GM access, and reload requirements independently. Hover or focus chips for their full meaning; the Default chip describes current/default values. A summary of saved settings explains pending reload requirements.
 - Empty results offer **Search all modules**, preserving the settings query. Custom windows offer **Show surrounding settings** to restore context while keeping matches highlighted.
 
-For arbitrary custom forms, a changed field does not prove that its owner has saved it. Such edits are labeled unconfirmed unless registered settings or an integration supply reliable saved values. The framework never guesses defaults for object subfields.
+For arbitrary custom forms, a changed field does not prove that its owner has saved it. Such edits are labeled unconfirmed unless registered settings or an integration supply reliable saved values. Fully qualified nested fields inherit their registered parent's scope and reload metadata; current/default comparisons address only that field's path. Unmapped controls show Scope unknown until an integration supplies metadata.
 
 ## Install
 

@@ -9,16 +9,28 @@
 .improved-settings aside input[type=search]::placeholder { font-family: inherit; font-weight: normal; top: auto; }
 .improved-settings .improved-status { font-size: var(--font-size-12, 12px); color: var(--color-text-secondary); line-height: 1.35; }
 .improved-settings .improved-coverage { font-size: var(--font-size-11, 11px); color: var(--color-text-subtle); line-height: 1.3; }
-.improved-settings .improved-options { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.improved-settings .improved-options label { display: flex; align-items: center; gap: 6px; flex: 1; }
-.improved-settings .improved-filter { width: auto; flex: 1; min-width: 140px; }
+.improved-settings .improved-search-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: end; }
+.improved-settings .improved-options { display: block; min-width: 0; }
+.improved-settings .improved-options > label { width: 100%; align-items: stretch; text-align: start; }
+.improved-settings .improved-filter-row { display: flex; width: 100%; gap: 8px; align-items: center; }
+.improved-settings .improved-filter { width: 100%; min-width: 0; flex: 1; }
 .improved-settings .improved-action, .improved-settings-child .improved-action { width: auto; min-height: 24px; height: auto; line-height: 1.35; padding: 4px 8px; font-size: var(--font-size-12, 12px); white-space: normal; }
-.improved-row-tools { flex: 0 0 100%; width: 100%; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; margin-top: 5px; font-size: var(--font-size-11, 11px); }
-.improved-row-tools .improved-badges { flex: 1; color: var(--color-text-secondary); }
-.improved-row-tools .improved-default { display: block; max-width: 100%; overflow-wrap: anywhere; padding-block: 5px; }
-.improved-row-actions summary, .improved-results summary, .improved-coverage summary, .improved-favorites summary { cursor: pointer; }
-.improved-row-actions[open] { flex: 0 0 100%; }
-.improved-row-actions button { margin: 4px 5px 0 0; }
+.improved-row-tools { flex: 0 0 100%; width: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-top: 3px; font-size: var(--font-size-11, 11px); }
+.improved-row-tools .improved-badges { display: flex; flex: 1; flex-wrap: wrap; align-items: center; gap: 4px; color: var(--color-text-secondary); }
+.improved-chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 7px; border: 1px solid color-mix(in srgb, currentColor 25%, transparent); border-radius: 20px; background: color-mix(in srgb, currentColor 7%, transparent); font-size: var(--font-size-11, 11px); line-height: 1.4; white-space: nowrap; cursor: help; }
+.improved-chip i { font-size: 0.9em; margin: 0; }
+.improved-row-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 2px; margin-inline-start: auto; }
+.improved-settings .improved-icon-button, .improved-settings-child .improved-icon-button { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 26px; width: 26px; height: 26px; min-height: 26px; padding: 3px; margin: 0; border: 0; border-radius: 4px; background: transparent; box-shadow: none; color: var(--color-text-secondary); }
+.improved-icon-button i { margin: 0; pointer-events: none; }
+.improved-icon-button[aria-pressed="true"] { color: var(--color-warm-1, #e3b45b); }
+.improved-settings .improved-icon-button[aria-pressed="true"], .improved-settings-child .improved-icon-button[aria-pressed="true"] { color: var(--color-warm-1, #e3b45b); }
+.improved-icon-button:hover:not(:disabled), .improved-icon-button:focus-visible { background: color-mix(in srgb, currentColor 12%, transparent); outline: 1px solid currentColor; }
+.improved-icon-button:disabled { opacity: 0.3; }
+.improved-results summary, .improved-coverage summary, .improved-favorites summary { cursor: pointer; }
+.improved-settings .improved-favorites { flex: 0 0 auto; padding-block: 6px; border-bottom: 1px solid var(--color-border-light-2, #635548); font-size: var(--font-size-12, 12px); }
+.improved-settings .improved-favorites summary { font-weight: bold; }
+.improved-settings .improved-favorite-list { max-height: 160px; }
+.improved-favorite-list small { color: var(--color-text-subtle); }
 .improved-row-tools, .improved-results { grid-column: 1 / -1; }
 .improved-settings .form-group:has(> .improved-row-tools), .improved-settings-child .form-group:has(> .improved-row-tools) { flex-wrap: wrap; }
 .improved-results { flex: 0 0 100%; padding: 5px 0; font-size: var(--font-size-12, 12px); }
@@ -35,6 +47,9 @@
 .improved-child-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .improved-child-status { flex: 1; min-width: 180px; }
 .improved-reset-preview { max-height: 55vh; overflow: auto; }
+@media (max-width: 760px) {
+  .improved-settings .improved-search-controls { grid-template-columns: 1fr; gap: 6px; }
+}
 .improved-settings .improved-match, .improved-settings-child .improved-match {
   outline: 2px solid var(--color-warm-1, #dd9b42);
   outline-offset: -2px;

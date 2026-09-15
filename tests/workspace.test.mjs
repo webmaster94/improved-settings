@@ -44,6 +44,28 @@ test('normalization on initial render does not count as an edit, and sets compar
   assert(sameValue(new Set(['a']), ['a']));
 });
 
+test('nested object fields inherit scope and reload metadata without reading or resetting the whole object', async () => {
+  const { workspace, app, values } = setup('<div class="form-group"><label>Theme</label><select name="sample.preferences.theme"><option value="dark" selected>Dark</option><option value="light">Light</option></select></div>');
+  workspace.game.settings.settings.set('sample.preferences', { namespace: 'sample', key: 'preferences', name: 'Preferences', scope: 'client', default: { theme: 'light', private: 'keep' } });
+  values['sample.preferences'] = { theme: 'dark', private: 'keep' };
+  workspace.invalidate(app);
+  workspace.attach(app, { main: false, namespace: 'sample' });
+  let record = workspace.records()[0];
+  assert.equal(record.scope, 'client');
+  assert.equal(record.defaultValue, 'light');
+  assert.equal(record.saved(), 'dark');
+  assert.equal(record.settingId, 'sample.preferences.theme');
+  await workspace.reset([record], 'Theme');
+  assert.equal(app.element.querySelector('select').value, 'light');
+  assert.deepEqual(values['sample.preferences'], { theme: 'dark', private: 'keep' });
+  workspace.game.settings.settings.get('sample.preferences').requiresReload = true;
+  workspace.invalidate(app);
+  workspace.attach(app, { namespace: 'sample' });
+  record = workspace.records()[0];
+  assert.equal(record.scope, 'client');
+  assert.equal(record.requiresReload, true);
+});
+
 test('reset previews include filtered controls, stage defaults through input events, and exclude unknown, disabled and sensitive controls', async () => {
   const { app, workspace, previews } = setup('<div class="form-group improved-hidden"><label>Limit</label><input type="number" name="sample.limit" value="4"></div><div class="form-group"><label>Disabled</label><input name="sample.enabled" type="checkbox" checked disabled></div><div class="form-group"><label>Unknown</label><input name="unknown" value="abc"></div><div class="form-group"><label>Secret</label><input name="secret" type="password" value="DO-NOT-COPY"></div>');
   let changes = 0;

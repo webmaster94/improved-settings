@@ -10,6 +10,8 @@ let installed;
 export function install() {
   if (installed) return installed;
   const SettingsConfig = foundry.applications.settings.SettingsConfig;
+  const defaultWidth = SettingsConfig.DEFAULT_OPTIONS.position.width;
+  SettingsConfig.DEFAULT_OPTIONS.position.width = Math.max(defaultWidth, 1040);
   const controllers = new Map();
   const children = new Map();
   const hooks = [];
@@ -114,6 +116,13 @@ export function install() {
       const main = this.root.querySelector(".main");
       if (!aside || !main) return;
       this.root.classList.add(ID);
+      if (!this.initialWidthSet) {
+        this.initialWidthSet = true;
+        if (this.app.position.width <= defaultWidth) {
+          const scale = this.root.getBoundingClientRect().width / this.root.offsetWidth || 1;
+          this.app.setPosition({ width: Math.min(1040, (window.innerWidth - 32) / scale) });
+        }
+      }
       // Keep the core control connected but out of the UI. Core can bind it again on partial renders.
       const native = this.root.querySelector('input[type="search"]:not([data-improved-ui])');
       if (native) {
@@ -137,27 +146,34 @@ export function install() {
       this.coverage = createUI('details', 'improved-coverage');
       this.coverage.append(createUI('summary', '', 'Search coverage'), createUI('div', 'improved-coverage-body'));
       const options = createUI('div', 'improved-options');
-      const filterLabel = createUI('label', '', 'Show');
+      const filterLabel = createUI('label', 'improved-search-label', 'Show');
+      const filterRow = createUI('div', 'improved-filter-row');
       this.filterSelect = createUI('select', 'improved-filter');
       this.filterSelect.setAttribute('aria-label', 'Filter settings');
-      for (const [value, title] of Object.entries({ all: 'All settings', changed: 'Different from default', unsaved: 'Unsaved or unconfirmed edits', favorites: 'Favorites' })) {
+      for (const [value, title] of Object.entries({ all: 'All settings', changed: 'Different from default', unsaved: 'Unsaved or unconfirmed edits' })) {
         const option = createUI('option', '', title); option.value = value; this.filterSelect.append(option);
       }
       this.filterSelect.value = this.mode;
       this.filterSelect.addEventListener('change', () => { this.mode = this.filterSelect.value; this.apply(); });
-      filterLabel.append(this.filterSelect);
-      this.resetModule = workspace.button('Reset module…', () => {
+      this.resetModule = workspace.iconButton('fa-solid fa-arrow-rotate-left', () => {
         const namespace = this.app.tabGroups.categories;
         return workspace.reset(workspace.records().filter(record => record.namespace === namespace), game.modules.get(namespace)?.title || namespace);
-      });
-      options.append(filterLabel, this.resetModule);
+      }, 'Reset module to defaults');
+      filterRow.append(this.filterSelect, this.resetModule);
+      filterLabel.append(filterRow);
+      options.append(filterLabel);
       this.editSummary = createUI('div', 'improved-edit-summary');
       this.reloadSummary = createUI('div', 'improved-reload-summary');
       this.reloadSummary.setAttribute('role', 'status');
       this.recovery = createUI('div', 'improved-recovery');
       this.favoritePanel = createUI('details', 'improved-favorites');
+      this.favoritePanel.dataset.improvedToolbar = '';
+      this.favoritePanel.open = true;
       this.favoritePanel.append(createUI('summary', '', 'Favorites'), createUI('div', 'improved-favorite-list'));
-      toolbar.append(this.settingBox.wrapper, options, this.editSummary, this.reloadSummary, this.status, this.recovery, this.favoritePanel, this.coverage);
+      this.moduleBox.wrapper.after(this.favoritePanel);
+      const searchControls = createUI('div', 'improved-search-controls');
+      searchControls.append(this.settingBox.wrapper, options);
+      toolbar.append(searchControls, this.editSummary, this.reloadSummary, this.status, this.recovery, this.coverage);
       main.prepend(toolbar);
       this.abort = new AbortController();
       this.root.addEventListener("click", event => captureButton(event, this, this.app), { capture: true, signal: this.abort.signal });
@@ -289,10 +305,12 @@ export function install() {
       this.favoritePanel.querySelector('summary').textContent = `Favorites (${workspace.favorites.size})`;
       const favorites = this.favoritePanel.querySelector('div');
       favorites.replaceChildren();
+      if (!workspace.favorites.size) favorites.append(createUI('small', '', 'Star a setting to add it here.'));
       for (const location of workspace.favorites.values()) {
         const row = createUI('div', 'improved-favorite');
         row.append(workspace.button(`${location.namespace} → ${location.label}`, () => this.openLocation(location)));
-        row.append(workspace.button('Remove', () => workspace.toggleFavorite(location), `Remove ${location.label} from favorites`));
+        row.append(workspace.iconButton('fa-solid fa-star', () => workspace.toggleFavorite(location), `Remove ${location.label} from favorites`));
+        row.lastElementChild.setAttribute('aria-pressed', 'true');
         favorites.append(row);
       }
     }
@@ -542,7 +560,7 @@ export function install() {
   windowObserver.observe(document.body, { childList: true });
 
   installed = {
-    version: "0.2.0",
+    version: "0.2.1",
     registerControlAdapter(id, adapter) {
       const remove = registerControlAdapter(id, adapter);
       for (const app of workspace.windows.keys()) workspace.invalidate(app);
@@ -574,6 +592,7 @@ export function install() {
     },
     uninstall() {
       disposed = true;
+      if (SettingsConfig.DEFAULT_OPTIONS.position.width === Math.max(defaultWidth, 1040)) SettingsConfig.DEFAULT_OPTIONS.position.width = defaultWidth;
       clearTimeout(refreshTimer);
       for (const [name, id] of hooks) Hooks.off(name, id);
       window.removeEventListener("resize", resized);

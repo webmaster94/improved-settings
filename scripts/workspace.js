@@ -5,6 +5,23 @@ const customSelector = 'range-picker, color-picker, file-picker, multi-select';
 const copyValue = value => value === undefined || typeof value === 'function' ? undefined : structuredClone(value);
 const stable = value => JSON.stringify(value, (_key, item) => item instanceof Set ? [...item].sort() : item && typeof item === 'object' && !Array.isArray(item) ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b))) : item);
 export const sameValue = (a, b) => stable(a) === stable(b);
+const fieldValue = (value, path) => path.reduce((object, key) => object != null && Object.hasOwn(object, key) ? object[key] : undefined, value);
+
+function registeredField(settings, name, namespace) {
+  for (const candidate of [name, `${namespace}.${name}`]) {
+    if (!candidate) continue;
+    let key = candidate;
+    const path = [];
+    while (key.includes('.')) {
+      const setting = settings.get(key);
+      if (setting) return { setting, settingId: candidate, fieldPath: path };
+      const dot = key.lastIndexOf('.');
+      path.unshift(key.slice(dot + 1));
+      key = key.slice(0, dot);
+    }
+  }
+  return { fieldPath: [] };
+}
 
 export function fieldControls(row) {
   return [...row.querySelectorAll(editableSelector)].filter(el => !el.closest('[data-improved-ui]') && !el.parentElement?.closest(customSelector));
@@ -113,9 +130,8 @@ export class SettingWorkspace {
       catch { /* One adapter cannot break the other settings. */ }
       const meta = { ...provider, ...custom };
       const fieldName = control.name || control.getAttribute('name');
-      let settingId = meta.settingId || row.dataset.settingId || (this.game.settings.settings.has(fieldName) ? fieldName : `${namespace}.${fieldName}`);
-      let setting = this.game.settings.settings.get(settingId);
-      // Never treat an object subfield as the registered object's complete value.
+      let { setting, settingId, fieldPath } = registeredField(this.game.settings.settings, meta.settingId || row.dataset.settingId || fieldName, namespace);
+      // Nested fields inherit metadata, while reads and resets address only their exact path.
       if (!setting || (!meta.settingId && controls.length > 1 && !controls.every(el => el.type === 'radio' && el.name === fieldName))) { setting = undefined; settingId = undefined; }
       const restricted = setting?.scope === 'world' && !this.game.user.can('SETTINGS_MODIFY');
       if (restricted) continue;
@@ -126,19 +142,20 @@ export class SettingWorkspace {
       const sensitive = controls.some(el => ['password', 'file'].includes(el.type));
       const read = () => {
         const value = sensitive ? undefined : meta.getValue ? copyValue(meta.getValue(row, state.app)) : readControl(control, controls);
-        if (control.tagName === 'SELECT' && !control.multiple && setting?.type === Number) return Number(value);
-        if (control.tagName === 'SELECT' && !control.multiple && setting?.type === Boolean) return value === 'true';
+        if (control.tagName === 'SELECT' && !control.multiple && (setting?.type === Number || fieldPath.length && typeof fieldValue(setting?.default, fieldPath) === 'number')) return Number(value);
+        if (control.tagName === 'SELECT' && !control.multiple && (setting?.type === Boolean || fieldPath.length && typeof fieldValue(setting?.default, fieldPath) === 'boolean')) return value === 'true';
         return value;
       };
-      const saved = setting ? () => copyValue(this.game.settings.get(setting.namespace, setting.key)) : meta.getSavedValue ? () => copyValue(meta.getSavedValue(row, state.app)) : undefined;
+      const saved = setting ? () => copyValue(fieldValue(this.game.settings.get(setting.namespace, setting.key), fieldPath)) : meta.getSavedValue ? () => copyValue(meta.getSavedValue(row, state.app)) : undefined;
       let value, savedValue;
       try { value = read(); savedValue = saved?.(); } catch { continue; }
       const record = old ?? { id, baseline: copyValue(value), touched: false };
       Object.assign(record, { row, controls, control, state, present: true, namespace, menuKey: state.context.menuKey, key, settingId,
-        label: meta.label || (setting ? this.game.i18n.localize(setting.name) : base.label), path, text: base.text,
+        label: meta.label || (setting && !fieldPath.length ? this.game.i18n.localize(setting.name) : base.label), path, text: base.text,
         read, saved, sensitive, scope: meta.scope ?? setting?.scope, requiresReload: meta.requiresReload ?? setting?.requiresReload,
+        access: meta.access ?? (setting?.scope === 'world' || this.game.settings.menus?.get(state.context.menuKey)?.restricted ? 'gm' : setting || meta.scope ? 'user' : undefined),
         saveMode: meta.saveMode || (state.context.main ? 'submit' : state.app.options?.form?.submitOnChange ? 'immediate' : 'unknown'),
-        defaultValue: copyValue(Object.hasOwn(meta, 'default') ? meta.default : setting?.default),
+        defaultValue: copyValue(Object.hasOwn(meta, 'default') ? meta.default : fieldValue(setting?.default, fieldPath)),
         hasDefault: !sensitive && (Object.hasOwn(meta, 'default') || (!!setting && Object.hasOwn(setting, 'default'))),
         setValue: meta.setValue ? value => meta.setValue(row, copyValue(value), state.app) : value => writeControl(control, copyValue(value), controls),
         canWrite: !sensitive && !controls.some(el => el.disabled || el.readOnly || el.hidden) && !row.closest('[hidden]') && (controls.length === 1 || controls.every(el => el.type === 'radio' && el.name === fieldName) || !!meta.setValue)
@@ -161,7 +178,7 @@ export class SettingWorkspace {
     record.dirty = record.sensitive ? record.touched : (record.touched || !sameValue(value, record.baseline)) && (record.saved ? !sameValue(value, saved) : !sameValue(value, record.baseline));
     if (record.saved && sameValue(value, saved)) { record.baseline = copyValue(value); record.touched = false; }
     record.different = record.hasDefault && !sameValue(value, record.defaultValue);
-    const signature = stable([value, record.defaultValue, record.dirty, record.different, this.favorites.has(record.id), record.canWrite, record.scope, record.requiresReload, record.saveMode]);
+    const signature = stable([value, record.defaultValue, record.dirty, record.different, this.favorites.has(record.id), record.canWrite, record.scope, record.access, record.requiresReload, record.saveMode]);
     if (record.decoration !== signature || !record.row.querySelector(':scope > .improved-row-tools')) {
       record.decoration = signature;
       this.decorate(record);
@@ -198,34 +215,52 @@ export class SettingWorkspace {
     if (!tools) {
       tools = this.ui('div', 'improved-row-tools');
       tools.append(this.ui('span', 'improved-badges'));
-      const actions = this.ui('details', 'improved-row-actions');
-      actions.append(this.ui('summary', '', 'Setting actions'));
-      actions.append(this.button('☆', () => this.toggleFavorite(tools.record), 'Toggle favorite'));
-      actions.append(this.button('Copy location', () => this.copy(locationText(this.location(tools.record)))));
-      actions.append(this.button('Reset…', () => this.reset([tools.record], tools.record.label)));
+      const actions = this.ui('div', 'improved-row-actions');
+      actions.append(this.iconButton('fa-regular fa-star', () => this.toggleFavorite(tools.record), 'Toggle favorite'));
+      actions.append(this.iconButton('fa-solid fa-passport', () => this.copy(locationText(this.location(tools.record))), 'Copy location'));
+      actions.append(this.iconButton('fa-solid fa-arrow-rotate-left', () => this.reset([tools.record], tools.record.label), 'Reset to default'));
       tools.append(actions);
       record.row.append(tools);
     }
     tools.record = record;
-    const labels = [];
-    const scope = { client: 'This browser', user: 'This user', world: 'Entire world' }[record.scope];
-    if (scope) labels.push(scope);
-    if (record.requiresReload) labels.push('Reload required');
-    if (record.dirty) labels.push(record.confirmed && record.saveMode !== 'immediate' ? 'Unsaved' : 'Edited; save state unconfirmed');
-    if (record.saveMode === 'immediate') labels.push('Saves immediately');
-    if (record.different) labels.push('Different from default');
     const badge = tools.querySelector('.improved-badges');
-    badge.textContent = labels.join(' · ');
+    badge.replaceChildren();
+    const scope = { client: ['fa-display', 'Browser', 'Applies to this browser'], user: ['fa-user', 'Player', 'Applies to this user in this world'], world: ['fa-globe', 'World', 'Applies to the entire world'] }[record.scope];
+    badge.append(this.chip(...(scope ?? ['fa-circle-question', 'Scope unknown', 'The form does not expose a registered setting or scope metadata'])));
+    if (record.access === 'gm') badge.append(this.chip('fa-user-shield', 'GM', 'Requires permission to configure the world or this restricted menu'));
+    else if (record.access === 'user' && record.scope !== 'user') badge.append(this.chip('fa-user', 'User', 'A user can configure their own preference'));
+    if (record.requiresReload) badge.append(this.chip('fa-rotate', 'Reload', 'Reload required after saving'));
+    if (record.dirty) badge.append(this.chip('fa-pen', record.confirmed && record.saveMode !== 'immediate' ? 'Unsaved' : 'Edited', record.confirmed && record.saveMode !== 'immediate' ? 'Unsaved change' : 'Edited; save state unconfirmed'));
+    if (record.saveMode === 'immediate') badge.append(this.chip('fa-bolt', 'Auto-save', 'Saves immediately'));
+    if (record.different) badge.append(this.chip('fa-sliders', 'Modified', 'Different from default'));
+    if (record.hasDefault) badge.append(this.chip('fa-circle-info', 'Default', `Current: ${this.display(record.read())} · Default: ${this.display(record.defaultValue)}`, 'improved-default'));
     record.row.classList.toggle('improved-dirty', record.dirty);
-    const actions = tools.querySelector('details');
+    const actions = tools.querySelector('.improved-row-actions');
     const [favorite, , reset] = actions.querySelectorAll('button');
-    favorite.textContent = this.favorites.has(record.id) ? '★' : '☆';
+    favorite.querySelector('i').className = this.favorites.has(record.id) ? 'fa-solid fa-star' : 'fa-regular fa-star';
     favorite.setAttribute('aria-pressed', String(this.favorites.has(record.id)));
     reset.disabled = !record.hasDefault || !record.canWrite || !record.different;
     reset.title = !record.hasDefault ? 'Default is unknown for this control' : !record.canWrite ? 'This control cannot be reset here' : 'Preview reset to default';
-    let defaults = actions.querySelector('.improved-default');
-    if (!defaults) { defaults = this.ui('small', 'improved-default'); actions.append(defaults); }
-    defaults.textContent = record.hasDefault ? `Current: ${this.display(record.read())} · Default: ${this.display(record.defaultValue)}` : 'Default is not provided by this form.';
+  }
+
+  iconButton(icon, action, label) {
+    const button = this.button('', action, label);
+    button.classList.add('improved-icon-button');
+    const glyph = this.ui('i', icon);
+    glyph.setAttribute('aria-hidden', 'true');
+    button.append(glyph);
+    return button;
+  }
+
+  chip(icon, label, title, className = '') {
+    const chip = this.ui('span', `improved-chip ${className}`.trim());
+    chip.title = title;
+    chip.setAttribute('aria-label', title);
+    chip.tabIndex = 0;
+    const glyph = this.ui('i', `fa-solid ${icon}`);
+    glyph.setAttribute('aria-hidden', 'true');
+    chip.append(glyph, this.document.createTextNode(label));
+    return chip;
   }
 
   display(value) {

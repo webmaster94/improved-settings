@@ -27,6 +27,10 @@ export async function runWorkspaceVerification() {
     removeAdapter = api.registerControlAdapter('workspace-qa', { selector: '[data-workspace-qa]', describe: () => ({ default: 2, scope: 'user', requiresReload: true, saveMode: 'submit', getSavedValue: () => saved }) });
     await sheet.render({ force: true, resetTabs: true });
     await api.refreshIndex();
+    check(!!sheet.element.querySelector('aside .improved-favorites') && !sheet.element.querySelector('.improved-filter option[value="favorites"]'), 'Favorites are in the sidebar and absent from the Show menu');
+    const searchBounds = sheet.element.querySelector('.improved-search-controls search').getBoundingClientRect();
+    const showBounds = sheet.element.querySelector('.improved-filter-row').getBoundingClientRect();
+    check(Math.abs(searchBounds.bottom - showBounds.bottom) < 3 && Math.abs(searchBounds.width - showBounds.width) < 3, 'Search and Show share an evenly divided row');
     api.search('prismatic', 'improved');
     const launch = sheet.element.querySelector(`[data-key="${menuKey}"]`);
     const preview = launch.closest('.form-group').querySelector('.improved-result-list button');
@@ -37,7 +41,7 @@ export async function runWorkspaceVerification() {
     check(child?.tabGroups.primary === 'second' && child.tabGroups.secondary === 'nested', 'Selecting a result opens its window and navigates parent and nested tabs');
     const input = child.element.querySelector('[name="prismatic"]');
     const row = input.closest('.form-group');
-    check(row.querySelector('.improved-badges').textContent.includes('This user') && row.querySelector('.improved-badges').textContent.includes('Reload required'), 'Custom metadata displays scope and reload requirements');
+    check(row.querySelector('.improved-badges').textContent.includes('Player') && row.querySelector('.improved-badges').textContent.includes('Reload'), 'Custom metadata displays scope and reload requirements');
     input.value = '9'; input.dispatchEvent(new Event('input', { bubbles: true }));
     await pause(180);
     api.search('ordinary');
@@ -53,6 +57,7 @@ export async function runWorkspaceVerification() {
     favorite = row.querySelector('.improved-row-actions button');
     if (favorite.getAttribute('aria-pressed') === 'true') { favorite.click(); await pause(100); }
     favorite.click(); await pause(100);
+    check(favorite.querySelector('.fa-solid.fa-star') && row.querySelector('[aria-label="Copy location"] .fa-passport') && !row.querySelector('details.improved-row-actions'), 'Favorite and copy are inline icons without a Settings actions disclosure');
     const storageKey = `improved-settings.favorites.${game.world.id}.${game.user.id}`;
     check(localStorage.getItem(storageKey).includes('Prismatic limit'), 'Favorites persist a custom setting location');
     check(sheet.element.querySelector('.improved-favorite-list').textContent.includes('Prismatic limit'), 'Favorites have a direct navigation list');
@@ -66,7 +71,7 @@ export async function runWorkspaceVerification() {
     child.element.querySelector('.improved-surrounding').click();
     setMode('changed');
     check(!row.classList.contains('improved-hidden'), 'Different-from-default filtering includes supported custom fields');
-    const reset = [...row.querySelectorAll('.improved-row-actions button')].find(button => button.textContent === 'Reset…');
+    const reset = [...row.querySelectorAll('.improved-row-actions button')].find(button => button.getAttribute('aria-label') === 'Reset to default');
     reset.click(); await pause(600);
     const previewElement = document.querySelector('dialog[open] .improved-reset-preview');
     check(previewElement?.textContent.includes('9 → 2'), 'Per-setting reset presents an exact current-to-default preview');
@@ -77,8 +82,8 @@ export async function runWorkspaceVerification() {
     check(input.value === '2' && saved === 9, 'Confirmed reset stages the value without saving the custom form');
     const mainInput = sheet.element.querySelector(`[name="${settingId}"]`);
     mainInput.value = '8'; mainInput.dispatchEvent(new Event('input', { bubbles: true }));
-    for (let attempt = 0; attempt < 12 && sheet.element.querySelector('.improved-options > button').disabled; attempt++) await pause(250);
-    sheet.element.querySelector('.improved-options > button').click(); await pause(600);
+    for (let attempt = 0; attempt < 12 && sheet.element.querySelector('.improved-options button').disabled; attempt++) await pause(250);
+    sheet.element.querySelector('.improved-options button').click(); await pause(600);
     const modulePreview = document.querySelector('dialog[open] .improved-reset-preview');
     check(modulePreview?.textContent.includes('Workspace main limit: 8 → 2'), 'Module reset includes editable settings hidden by the active search');
     modulePreview.closest('dialog').querySelector('[data-action="yes"]').click(); await pause(600);
